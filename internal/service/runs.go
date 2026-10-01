@@ -41,8 +41,7 @@ func (s *Service) CreateRun(input CreateRunInput) (domain.FermentationRun, error
 		if !ok {
 			return domain.NewError(domain.CodeFormulaNotFound, "formula was not found")
 		}
-		eligibility, found := snapshot.Eligibility[run.FormulaID]
-		if !found || !eligibility.AllowsRun(formula) {
+		if !formula.EligibilitySnapshot().CanRun {
 			return domain.NewError(domain.CodeFormulaState,
 				"run requires an approved formula")
 		}

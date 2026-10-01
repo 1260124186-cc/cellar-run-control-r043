@@ -91,11 +91,7 @@ func normalizeSnapshot(value domain.Snapshot) (domain.Snapshot, error) {
 func rebuildFormulaEligibility(snapshot *domain.Snapshot) {
 	rebuilt := make(map[string]domain.FormulaEligibility, len(snapshot.Formulas))
 	for id, formula := range snapshot.Formulas {
-		eligibility := formula.EligibilitySnapshot()
-		if formula.State == domain.FormulaApproved {
-			eligibility.Version = formula.Version - 1
-		}
-		rebuilt[id] = eligibility
+		rebuilt[id] = formula.EligibilitySnapshot()
 	}
 	snapshot.Eligibility = rebuilt
 }
