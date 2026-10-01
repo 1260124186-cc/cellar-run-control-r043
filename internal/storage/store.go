@@ -78,26 +78,10 @@ func normalizeSnapshot(value domain.Snapshot) (domain.Snapshot, error) {
 	if value.RunIndex == nil {
 		value.RunIndex = map[string]string{}
 	}
-	if value.Eligibility == nil {
-		value.Eligibility = map[string]domain.FormulaEligibility{}
-	}
 	if err := validateIndexes(value); err != nil {
 		return domain.Snapshot{}, err
 	}
-	rebuildFormulaEligibility(&value)
 	return value, nil
-}
-
-func rebuildFormulaEligibility(snapshot *domain.Snapshot) {
-	rebuilt := make(map[string]domain.FormulaEligibility, len(snapshot.Formulas))
-	for id, formula := range snapshot.Formulas {
-		eligibility := formula.EligibilitySnapshot()
-		if formula.State == domain.FormulaApproved {
-			eligibility.Version = formula.Version - 1
-		}
-		rebuilt[id] = eligibility
-	}
-	snapshot.Eligibility = rebuilt
 }
 
 func validateIndexes(value domain.Snapshot) error {

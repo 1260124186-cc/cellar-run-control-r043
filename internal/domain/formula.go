@@ -39,41 +39,16 @@ type Formula struct {
 	RetiredAt             *time.Time    `json:"retired_at,omitempty"`
 }
 
-// FormulaEligibility is a version-bound projection of the approval and
-// run-creation decisions that are derived from a formula.
-type FormulaEligibility struct {
-	Version    int64 `json:"version"`
-	CanApprove bool  `json:"can_approve"`
-	CanRun     bool  `json:"can_run"`
+// RunnableForRun reports whether the saved formula may back a new run: only
+// an approved formula qualifies; drafts and retired formulas do not.
+func (f Formula) RunnableForRun() bool {
+	return f.State == FormulaApproved
 }
 
 func (f Formula) Clone() Formula {
 	cloned := f
 	cloned.Steps = append([]FormulaStep(nil), f.Steps...)
 	return cloned
-}
-
-func (f Formula) EligibilitySnapshot() FormulaEligibility {
-	canApprove := f.State == FormulaDraft &&
-		ValidateFormulaSteps(f.Steps, true) == nil
-	canRun := f.State == FormulaApproved
-	return FormulaEligibility{
-		Version:    f.Version,
-		CanApprove: canApprove,
-		CanRun:     canRun,
-	}
-}
-
-func (e FormulaEligibility) Matches(formula Formula) bool {
-	return e.Version == formula.Version
-}
-
-func (e FormulaEligibility) AllowsApproval(formula Formula) bool {
-	return e.Matches(formula) && e.CanApprove
-}
-
-func (e FormulaEligibility) AllowsRun(formula Formula) bool {
-	return e.Matches(formula) && e.CanRun
 }
 
 func (f *Formula) Normalize() {

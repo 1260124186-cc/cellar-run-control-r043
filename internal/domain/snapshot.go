@@ -8,10 +8,9 @@ type Snapshot struct {
 	Formulas    map[string]Formula            `json:"formulas"`
 	Vessels     map[string]Vessel             `json:"vessels"`
 	Runs        map[string]FermentationRun    `json:"runs"`
-	NameIndex   map[string]string             `json:"formula_name_index"`
-	VesselIndex map[string]string             `json:"vessel_code_index"`
-	RunIndex    map[string]string             `json:"run_code_index"`
-	Eligibility map[string]FormulaEligibility `json:"formula_eligibility,omitempty"`
+	NameIndex   map[string]string          `json:"formula_name_index"`
+	VesselIndex map[string]string          `json:"vessel_code_index"`
+	RunIndex    map[string]string          `json:"run_code_index"`
 }
 
 func EmptySnapshot() Snapshot {
@@ -23,7 +22,6 @@ func EmptySnapshot() Snapshot {
 		NameIndex:   map[string]string{},
 		VesselIndex: map[string]string{},
 		RunIndex:    map[string]string{},
-		Eligibility: map[string]FormulaEligibility{},
 	}
 }
 
@@ -53,9 +51,6 @@ func (s Snapshot) Clone() Snapshot {
 	}
 	for key, value := range s.RunIndex {
 		cloned.RunIndex[key] = value
-	}
-	for key, value := range s.Eligibility {
-		cloned.Eligibility[key] = value
 	}
 	return cloned
 }

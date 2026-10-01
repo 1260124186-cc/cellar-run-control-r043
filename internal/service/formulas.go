@@ -41,7 +41,6 @@ func (s *Service) CreateFormula(input CreateFormulaInput) (domain.Formula, error
 		}
 		snapshot.Formulas[formula.ID] = formula
 		snapshot.NameIndex[nameKey] = formula.ID
-		snapshot.Eligibility[formula.ID] = formula.EligibilitySnapshot()
 		return nil
 	})
 	if err != nil {
@@ -63,14 +62,11 @@ func (s *Service) SetFormulaSteps(
 		if err := s.checkExpected(formula.Version, input.ExpectedVersion); err != nil {
 			return err
 		}
-		eligibility := formula.EligibilitySnapshot()
 		if err := formula.SetSteps(input.Steps); err != nil {
 			return err
 		}
 		formula.UpdatedAt = s.clock.Now()
 		snapshot.Formulas[id] = formula
-		eligibility.Version = formula.Version
-		snapshot.Eligibility[id] = eligibility
 		updated = formula.Clone()
 		return nil
 	})
@@ -90,16 +86,10 @@ func (s *Service) ApproveFormula(id string, input VersionInput) (domain.Formula,
 		if err := s.checkExpected(formula.Version, input.ExpectedVersion); err != nil {
 			return err
 		}
-		eligibility, ok := snapshot.Eligibility[id]
-		if !ok || !eligibility.AllowsApproval(formula) {
-			return domain.NewError(domain.CodeFormulaState,
-				"formula is not ready for approval")
-		}
 		if err := formula.Approve(s.clock.Now()); err != nil {
 			return err
 		}
 		snapshot.Formulas[id] = formula
-		snapshot.Eligibility[id] = formula.EligibilitySnapshot()
 		updated = formula.Clone()
 		return nil
 	})
@@ -130,12 +120,6 @@ func (s *Service) RetireFormula(id string, input VersionInput) (domain.Formula, 
 			return err
 		}
 		snapshot.Formulas[id] = formula
-		eligibility, ok := snapshot.Eligibility[id]
-		if !ok {
-			eligibility = formula.EligibilitySnapshot()
-		}
-		eligibility.Version = formula.Version
-		snapshot.Eligibility[id] = eligibility
 		updated = formula.Clone()
 		return nil
 	})
